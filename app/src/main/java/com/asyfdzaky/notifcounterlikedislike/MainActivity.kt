@@ -8,12 +8,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.asyfdzaky.notifcounterlikedislike.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
             updateLikeDislike() // Memperbarui nilai counter secara real-time
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -34,7 +38,9 @@ class MainActivity : AppCompatActivity() {
 
 
         // Register receiver untuk mendengar perubahan counter
-        registerReceiver(updateReceiver, IntentFilter("ACTION_UPDATE_COUNTERS"))
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(updateReceiver, IntentFilter("ACTION_UPDATE_COUNTERS"))
+        updateLikeDislike()
         //Fungsi registerReceiver() ini akan membuat aplikasi mendengarkan setiap broadcast yang dikirimkan dengan action ini dan kemudian menjalankan onReceive() di updateReceiver.
         //Dengan menggunakan IntentFilter("ACTION_UPDATE_COUNTERS"), aplikasi Anda hanya akan mendengarkan broadcast dengan action tertentu, yaitu "ACTION_UPDATE_COUNTERS", dan tidak akan mendengarkan broadcast lainnya.
 
@@ -91,6 +97,6 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(updateReceiver) // Unregister receiver saat activity dihancurkan
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(updateReceiver)// Unregister receiver saat activity dihancurkan
     }
 }
